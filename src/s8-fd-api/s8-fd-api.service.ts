@@ -30,4 +30,9 @@ export class S8FdApiService {
     );
     return response.data;
   }
+
+  async getAllAccounts() {
+    const response = await this.coinbaseUpstreamClient.get('/accounts');
+    return response.data;
+  }
 }

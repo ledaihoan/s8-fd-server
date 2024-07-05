@@ -11,7 +11,7 @@ import { S8FdApiController } from './s8-fd-api.controller';
         secret: process.env.CB_API_SECRET,
         passPhrase: process.env.CB_API_PASS_PHRASE,
         axiosOptions: {
-          baseURL: process.env.CB_ABI_BASE_URL,
+          baseURL: process.env.CB_API_BASE_URL,
         },
       },
     }),

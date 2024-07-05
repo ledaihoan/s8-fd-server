@@ -1,9 +1,15 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { CoinbaseModuleOption, MODULE_OPTIONS } from './coinbase-module-option';
+import {
+  CB_HTTP_OPTIONS_TOKEN,
+  CoinbaseModuleOption,
+  MODULE_OPTIONS,
+} from './coinbase-module-option';
 import { CoinbaseUpstreamClient } from './coinbase-upstream.client';
 import { HttpModule } from '../http/http.module';
 import { HttpModuleAsyncOptions } from '../http/http.types';
 import { RetryInterceptor } from '../http/interceptors';
+import { CoinbaseRestApiAuthInterceptor } from './interceptors/coinbase-rest-api-auth.interceptor';
+import { S8FdApiService } from '../s8-fd-api/s8-fd-api.service';
 
 @Module({})
 export class CoinbaseClientModule {
@@ -14,14 +20,23 @@ export class CoinbaseClientModule {
       imports: [
         HttpModule.registerAsync({
           imports: [...(httpOptions.imports || [])],
-          providers: [RetryInterceptor],
+          providers: [
+            RetryInterceptor,
+            CoinbaseRestApiAuthInterceptor,
+            {
+              provide: CB_HTTP_OPTIONS_TOKEN,
+              useValue: option.httpOptions,
+            },
+          ],
           axiosOptions: httpOptions.axiosOptions,
           inject: httpOptions.inject,
           interceptorsInject: [
             RetryInterceptor,
+            CoinbaseRestApiAuthInterceptor,
             ...(httpOptions.interceptorsInject || httpOptions.inject || []),
           ],
           interceptorsFactory: async (
+            authInterceptor: CoinbaseRestApiAuthInterceptor,
             retryInterceptor: RetryInterceptor,
             ...args
           ) => {
@@ -30,15 +45,16 @@ export class CoinbaseClientModule {
                 ...args,
               );
 
-              return [retryInterceptor, ...interceptors];
+              return [authInterceptor, retryInterceptor, ...interceptors];
             }
-            return [retryInterceptor];
+            return [authInterceptor, retryInterceptor];
           },
         }),
       ],
       providers: [
         { provide: MODULE_OPTIONS, useValue: option },
         CoinbaseUpstreamClient,
+        S8FdApiService,
       ],
       exports: [CoinbaseUpstreamClient],
     };

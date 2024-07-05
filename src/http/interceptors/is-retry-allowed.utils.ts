@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios';
-import _ from 'lodash';
+import * as _ from 'lodash';
 
 import { AxiosRequestConfigWithCustomData } from '../http.types';
 

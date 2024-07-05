@@ -21,4 +21,9 @@ export class S8FdApiController {
   ) {
     return this.service.getExchangeProductCandles(exchangeProvider, productId);
   }
+
+  @Get('coinbase/accounts')
+  async getAllAccounts() {
+    return this.service.getAllAccounts();
+  }
 }
