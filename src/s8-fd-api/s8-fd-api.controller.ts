@@ -11,6 +11,14 @@ export class S8FdApiController {
   async getAllTradingPairs(
     @Param('exchangeProvider') exchangeProvider: string,
   ) {
-    return this.service.getAllTradingPairs(exchangeProvider);
+    return this.service.getAllTradingPairsByExchange(exchangeProvider);
+  }
+
+  @Get(':exchangeProvider/products/:productId/candles')
+  async getExchangeProductCandles(
+    @Param('exchangeProvider') exchangeProvider: string,
+    @Param('productId') productId: string,
+  ) {
+    return this.service.getExchangeProductCandles(exchangeProvider, productId);
   }
 }
