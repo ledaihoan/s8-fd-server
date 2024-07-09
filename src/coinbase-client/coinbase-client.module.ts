@@ -4,6 +4,7 @@ import { CoinbaseUpstreamClient } from './coinbase-upstream.client';
 import { HttpModule } from '../http/http.module';
 import { HttpModuleAsyncOptions } from '../http/http.types';
 import { RetryInterceptor } from '../http/interceptors';
+import { CoinbaseWsClient } from './coinbase-ws-client';
 
 @Module({})
 export class CoinbaseClientModule {
@@ -39,6 +40,7 @@ export class CoinbaseClientModule {
       providers: [
         { provide: MODULE_OPTIONS, useValue: option },
         CoinbaseUpstreamClient,
+        CoinbaseWsClient,
       ],
       exports: [CoinbaseUpstreamClient],
     };

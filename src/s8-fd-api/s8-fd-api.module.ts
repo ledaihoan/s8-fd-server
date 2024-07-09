@@ -14,6 +14,10 @@ import { S8FdApiController } from './s8-fd-api.controller';
           baseURL: process.env.CB_ABI_BASE_URL,
         },
       },
+      wssOptions: {
+        directMarketWsUri: process.env.CB_DIRECT_MARKET_WS_URI,
+        marketWsUri: process.env.CB_MARKET_WS_URI,
+      },
     }),
   ],
   providers: [S8FdApiService],
