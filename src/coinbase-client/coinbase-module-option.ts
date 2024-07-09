@@ -7,8 +7,14 @@ export type CoinbaseHttpExtraOptions = {
 };
 export type CoinbaseHttpOptions = HttpModuleAsyncOptions &
   CoinbaseHttpExtraOptions;
+
+export type CoinbaseWsOptions = {
+  directMarketWsUri: string;
+  marketWsUri: string;
+};
 export type CoinbaseModuleOption = {
   httpOptions: CoinbaseHttpOptions;
+  wssOptions: CoinbaseWsOptions;
 };
 
 export const MODULE_OPTIONS = Symbol.for('MODULE_OPTIONS');

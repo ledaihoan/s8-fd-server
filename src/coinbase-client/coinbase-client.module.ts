@@ -10,6 +10,7 @@ import { HttpModuleAsyncOptions } from '../http/http.types';
 import { RetryInterceptor } from '../http/interceptors';
 import { CoinbaseRestApiAuthInterceptor } from './interceptors/coinbase-rest-api-auth.interceptor';
 import { S8FdApiService } from '../s8-fd-api/s8-fd-api.service';
+import { CoinbaseWsClient } from './coinbase-ws-client';
 
 @Module({})
 export class CoinbaseClientModule {
@@ -54,7 +55,7 @@ export class CoinbaseClientModule {
       providers: [
         { provide: MODULE_OPTIONS, useValue: option },
         CoinbaseUpstreamClient,
-        S8FdApiService,
+        CoinbaseWsClient,
       ],
       exports: [CoinbaseUpstreamClient],
     };
