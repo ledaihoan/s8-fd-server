@@ -5,13 +5,15 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import * as WebSocket from 'ws';
-import { CoinbaseModuleOption, MODULE_OPTIONS } from './coinbase-module-option';
 import {
-  base64ToBinary,
-  createHmac,
-  decodeBase64,
-} from '../utils/encryption.util';
+  CB_WS_QUEUE_TOKEN,
+  CoinbaseModuleOption,
+  MODULE_OPTIONS,
+} from './coinbase-module-option';
+import { base64ToBinary, createHmac } from '../utils/encryption.util';
 import * as moment from 'moment';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 const SIGNATURE_PATH = '/users/self/verify';
 
@@ -20,7 +22,10 @@ export class CoinbaseWsClient implements OnModuleInit, OnModuleDestroy {
   private ws: WebSocket;
   private directWs: WebSocket;
 
-  constructor(@Inject(MODULE_OPTIONS) private options: CoinbaseModuleOption) {}
+  constructor(
+    @Inject(MODULE_OPTIONS) private options: CoinbaseModuleOption,
+    @InjectQueue(CB_WS_QUEUE_TOKEN.toString()) private queue: Queue,
+  ) {}
 
   onModuleInit() {
     this.connect();
@@ -42,6 +47,9 @@ export class CoinbaseWsClient implements OnModuleInit, OnModuleDestroy {
       const message = JSON.parse(data.toString());
       // Handle incoming messages
       console.log('Received:', message);
+      if (message && message.type === 'ticker') {
+        this.queue.add('ticker', message);
+      }
     });
 
     this.ws.on('error', (error) => {

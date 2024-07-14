@@ -1,7 +1,9 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import {
   CB_HTTP_OPTIONS_TOKEN,
+  CB_WS_QUEUE_TOKEN,
   CoinbaseModuleOption,
+  CoinbaseQueueOptions,
   MODULE_OPTIONS,
 } from './coinbase-module-option';
 import { CoinbaseUpstreamClient } from './coinbase-upstream.client';
@@ -9,8 +11,9 @@ import { HttpModule } from '../http/http.module';
 import { HttpModuleAsyncOptions } from '../http/http.types';
 import { RetryInterceptor } from '../http/interceptors';
 import { CoinbaseRestApiAuthInterceptor } from './interceptors/coinbase-rest-api-auth.interceptor';
-import { S8FdApiService } from '../s8-fd-api/s8-fd-api.service';
 import { CoinbaseWsClient } from './coinbase-ws-client';
+import { BullModule } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Module({})
 export class CoinbaseClientModule {
@@ -19,6 +22,7 @@ export class CoinbaseClientModule {
     return {
       module: CoinbaseClientModule,
       imports: [
+        BullModule.registerQueue({ name: option.queueOptions.queueName }),
         HttpModule.registerAsync({
           imports: [...(httpOptions.imports || [])],
           providers: [
@@ -27,6 +31,12 @@ export class CoinbaseClientModule {
             {
               provide: CB_HTTP_OPTIONS_TOKEN,
               useValue: option.httpOptions,
+            },
+            {
+              provide: CB_WS_QUEUE_TOKEN,
+              useFactory: (queueOptions: CoinbaseQueueOptions) => {
+                return new Queue(queueOptions.queueName);
+              },
             },
           ],
           axiosOptions: httpOptions.axiosOptions,

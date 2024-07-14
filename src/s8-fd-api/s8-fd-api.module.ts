@@ -18,6 +18,9 @@ import { S8FdApiController } from './s8-fd-api.controller';
         directMarketWsUri: process.env.CB_DIRECT_MARKET_WS_URI,
         marketWsUri: process.env.CB_MARKET_WS_URI,
       },
+      queueOptions: {
+        queueName: process.env.WS_QUEUE_NAME,
+      },
     }),
   ],
   providers: [S8FdApiService],
