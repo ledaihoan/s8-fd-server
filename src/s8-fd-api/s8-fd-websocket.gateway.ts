@@ -18,6 +18,7 @@ import { Logger } from '@nestjs/common';
   cors: {
     origin: '*',
   },
+  namespace: 'socket.io',
 })
 @Processor('wss_queue')
 export class S8FdWebsocketGateway
