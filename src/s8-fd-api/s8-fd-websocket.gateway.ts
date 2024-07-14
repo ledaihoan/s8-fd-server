@@ -14,7 +14,11 @@ import { CoinbaseWsClient } from '../coinbase-client/coinbase-ws-client';
 import * as _ from 'lodash';
 import { Logger } from '@nestjs/common';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  cors: {
+    origin: '*',
+  },
+})
 @Processor('wss_queue')
 export class S8FdWebsocketGateway
   extends WorkerHost
