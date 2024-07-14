@@ -47,7 +47,7 @@ export class CoinbaseWsClient implements OnModuleInit, OnModuleDestroy {
     this.ws.on('message', (data: WebSocket.Data) => {
       const message = JSON.parse(data.toString());
       // Handle incoming messages
-      this.logger.log('Received:', JSON.stringify(message));
+      // this.logger.log('Received:', JSON.stringify(message));
       if (message && message.type === 'ticker') {
         this.queue.add('ticker', message);
       }

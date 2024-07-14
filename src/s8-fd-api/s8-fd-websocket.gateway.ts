@@ -14,7 +14,7 @@ import { CoinbaseWsClient } from '../coinbase-client/coinbase-ws-client';
 import * as _ from 'lodash';
 import { Logger } from '@nestjs/common';
 
-@WebSocketGateway({
+@WebSocketGateway(8900, {
   cors: {
     origin: '*',
   },
