@@ -1,6 +1,7 @@
 import {
   Inject,
   Injectable,
+  Logger,
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
@@ -12,7 +13,6 @@ import {
 } from './coinbase-module-option';
 import { base64ToBinary, createHmac } from '../utils/encryption.util';
 import * as moment from 'moment';
-import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 
 const SIGNATURE_PATH = '/users/self/verify';
@@ -21,10 +21,11 @@ const SIGNATURE_PATH = '/users/self/verify';
 export class CoinbaseWsClient implements OnModuleInit, OnModuleDestroy {
   private ws: WebSocket;
   private directWs: WebSocket;
+  private logger = new Logger(CoinbaseWsClient.name);
 
   constructor(
     @Inject(MODULE_OPTIONS) private options: CoinbaseModuleOption,
-    @InjectQueue(CB_WS_QUEUE_TOKEN.toString()) private queue: Queue,
+    @Inject(CB_WS_QUEUE_TOKEN) private queue: Queue,
   ) {}
 
   onModuleInit() {
@@ -39,36 +40,38 @@ export class CoinbaseWsClient implements OnModuleInit, OnModuleDestroy {
     this.ws = new WebSocket(this.options.wssOptions.marketWsUri);
     // this.directWs = new WebSocket(this.options.wssOptions.directMarketWsUri);
     this.ws.on('open', () => {
-      this.subscribe(this.ws);
-      console.log('Connected to Coinbase WebSocket');
+      this.subscribe(['BTC-USD']);
+      this.logger.log('Connected to Coinbase WebSocket');
     });
 
     this.ws.on('message', (data: WebSocket.Data) => {
       const message = JSON.parse(data.toString());
       // Handle incoming messages
-      console.log('Received:', message);
+      this.logger.log('Received:', JSON.stringify(message));
       if (message && message.type === 'ticker') {
         this.queue.add('ticker', message);
       }
     });
 
     this.ws.on('error', (error) => {
-      console.error('WebSocket error:', error);
+      this.logger.error('WebSocket error:', error);
     });
 
     this.ws.on('close', () => {
-      console.log('Disconnected from Coinbase WebSocket');
+      this.logger.log('Disconnected from Coinbase WebSocket');
     });
   }
 
-  private subscribe(ws: WebSocket) {
+  public subscribe(productIds: string[], ws: WebSocket = this.ws) {
     const subscribeMessage = {
       type: 'subscribe',
-      product_ids: ['BTC-USD'],
+      product_ids: productIds,
       channels: ['ticker'],
     };
     const subscriptionPayload = this.buildSubscriptionPayload(subscribeMessage);
-    console.log(`sending subscription ${JSON.stringify(subscriptionPayload)}`);
+    this.logger.log(
+      `sending subscription ${JSON.stringify(subscriptionPayload)}`,
+    );
     ws.send(Buffer.from(JSON.stringify(subscriptionPayload)));
   }
 

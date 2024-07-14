@@ -3,7 +3,6 @@ import {
   CB_HTTP_OPTIONS_TOKEN,
   CB_WS_QUEUE_TOKEN,
   CoinbaseModuleOption,
-  CoinbaseQueueOptions,
   MODULE_OPTIONS,
 } from './coinbase-module-option';
 import { CoinbaseUpstreamClient } from './coinbase-upstream.client';
@@ -18,6 +17,7 @@ import { Queue } from 'bullmq';
 @Module({})
 export class CoinbaseClientModule {
   static register(option: CoinbaseModuleOption): DynamicModule {
+    console.log(option);
     const httpOptions: HttpModuleAsyncOptions = option.httpOptions || {};
     return {
       module: CoinbaseClientModule,
@@ -31,12 +31,6 @@ export class CoinbaseClientModule {
             {
               provide: CB_HTTP_OPTIONS_TOKEN,
               useValue: option.httpOptions,
-            },
-            {
-              provide: CB_WS_QUEUE_TOKEN,
-              useFactory: (queueOptions: CoinbaseQueueOptions) => {
-                return new Queue(queueOptions.queueName);
-              },
             },
           ],
           axiosOptions: httpOptions.axiosOptions,
@@ -64,10 +58,16 @@ export class CoinbaseClientModule {
       ],
       providers: [
         { provide: MODULE_OPTIONS, useValue: option },
+        {
+          provide: CB_WS_QUEUE_TOKEN,
+          useFactory: () => {
+            return new Queue(option.queueOptions.queueName);
+          },
+        },
         CoinbaseUpstreamClient,
         CoinbaseWsClient,
       ],
-      exports: [CoinbaseUpstreamClient],
+      exports: [CoinbaseUpstreamClient, CoinbaseWsClient],
     };
   }
 }
